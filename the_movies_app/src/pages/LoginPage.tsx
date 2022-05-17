@@ -1,15 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { TextField } from "../components/TextField";
 import { useHistory } from "react-router-dom";
-import data from "../db/data.json";
 import axios from "axios";
 
 export const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { replace } = useHistory();
-
-  const users = data.users;
 
   const checkUser = () => {
     if (email === "" || password === "") {
@@ -18,20 +15,27 @@ export const LoginPage = () => {
     }
     axios
       .post("http://localhost:1337/api/auth/local", {
-        identifier: "user@strapi.io",
-        password: "strapiPassword",
+        identifier: email,
+        password: password,
       })
       .then((response) => {
         // Handle success.
         console.log("Well done!");
-        console.log("User profile", response.data.user);
         console.log("User token", response.data.jwt);
+        localStorage.setItem("token", response.data.jwt);
+        replace("/");
       })
       .catch((error) => {
         // Handle error.
         console.log("An error occurred:", error.response);
       });
   };
+
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      replace("/");
+    }
+  }, []);
 
   return (
     <div className="m-4">
